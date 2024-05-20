@@ -1,4 +1,4 @@
-use [LinqPerformanceDemo]
+USE [LinqPerformanceDemo];
 
 CREATE TABLE [dbo].[LargeTable](
 	[ID] [int] IDENTITY(1,1) NOT NULL,

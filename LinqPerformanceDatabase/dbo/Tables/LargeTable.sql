@@ -4,7 +4,7 @@
     [ProjectRef]   VARCHAR (50)   NULL,
     [ExternalRef]  INT            NULL,
     [StartDate]    DATETIME       NULL,
-    [IsMale]       BIT            NULL,
+    [IsActive]     BIT            NULL,
     [SecurityType] CHAR (1)       NULL,
     [Height]       FLOAT (53)     NULL,
     [Address]      NVARCHAR (100) NULL,
