@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqOpenJsonInClause", "Lin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoLinqContainsOpenJson", "DemoLinqContainsOpenJson\DemoLinqContainsOpenJson.csproj", "{23CC0F78-DF8E-4ED4-8495-B2A256855967}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "LinqPerformanceDatabase", "LinqPerformanceDatabase\LinqPerformanceDatabase.sqlproj", "{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,12 @@ Global
 		{23CC0F78-DF8E-4ED4-8495-B2A256855967}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23CC0F78-DF8E-4ED4-8495-B2A256855967}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23CC0F78-DF8E-4ED4-8495-B2A256855967}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
