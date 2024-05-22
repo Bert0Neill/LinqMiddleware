@@ -19,7 +19,7 @@ public partial class LargeTable
 
     public bool? IsActive { get; set; }
 
-    public string SecurityType { get; set; }
+    public Char SecurityType { get; set; }
 
     public double? Height { get; set; }
 
