@@ -1,9 +1,23 @@
+-- Check if the database exists
+IF EXISTS (SELECT name FROM sys.databases WHERE name = N'LinqPerformanceDemo')
+BEGIN
+    -- Drop the database if it exists
+    DROP DATABASE [LinqPerformanceDemo];
+END
+GO
+
+-- Create a new database
+CREATE DATABASE [LinqPerformanceDemo];
+GO
+
 USE [LinqPerformanceDemo];
 
+-- Drop the table if it exists
 IF OBJECT_ID('dbo.LargeTable', 'U') IS NOT NULL
     DROP TABLE [dbo].[LargeTable];
 GO
 
+-- Create table schema
 CREATE TABLE [dbo].[LargeTable](
 	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[CodeName] [varchar](50) NULL,
@@ -17,9 +31,10 @@ CREATE TABLE [dbo].[LargeTable](
 );
 GO
 
+-- Loop and insert 1M records
 DECLARE @Counter INT = 0;
 
-WHILE @Counter < 1000000
+WHILE @Counter < 5000000
 BEGIN
     INSERT INTO dbo.LargeTable ([CodeName], [ProjectRef], [ExternalRef], [StartDate], [IsActive], SecurityType, Height, Address)
     VALUES (
