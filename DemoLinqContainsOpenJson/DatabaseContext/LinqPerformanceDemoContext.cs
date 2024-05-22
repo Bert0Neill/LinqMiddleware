@@ -14,7 +14,6 @@ public partial class LinqPerformanceDemoContext : DbContext
     public LinqPerformanceDemoContext(DbContextOptions<LinqPerformanceDemoContext> options) : base(options)
     {
     }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var config = new ConfigurationBuilder()
@@ -26,7 +25,13 @@ public partial class LinqPerformanceDemoContext : DbContext
         var connectionString = config.GetConnectionString("DefaultConnection");
 
         // Configure the context to use SQL Server
-        optionsBuilder.UseSqlServer(connectionString);
+        //optionsBuilder.UseSqlServer(connectionString);
+
+        // Configure the context to use SQL Server
+        optionsBuilder.UseSqlServer(connectionString, options =>
+        {
+            options.CommandTimeout(180); // Set command timeout (in seconds)
+        });
     }
 
     public virtual DbSet<LargeTable> LargeTables { get; set; }
