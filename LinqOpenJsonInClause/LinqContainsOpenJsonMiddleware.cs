@@ -5,9 +5,19 @@ using System.Text;
 
 namespace LinqOpenJsonInClause
 {
-    public class LinqContainsOpenJsonMiddleware : DbCommandInterceptor
+    public class LinqContainsOpenJsonMiddleware : DbCommandInterceptor, ILinqContainsOpenJsonMiddleware
     {
+        public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result, CancellationToken cancellationToken = default)
+        {
+            return new ValueTask<InterceptionResult<DbDataReader>>(CheckForInClause(command, result));
+        }
+
         public override InterceptionResult<DbDataReader> ReaderExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result)
+        {
+            return CheckForInClause(command, result);
+        }
+
+        private static InterceptionResult<DbDataReader> CheckForInClause(DbCommand command, InterceptionResult<DbDataReader> result)
         {
             if (command.CommandText.Contains(" IN ("))
             {
@@ -28,7 +38,7 @@ namespace LinqOpenJsonInClause
                     {
                         return s.Value; // return the original (LINQ) SQL statement with the small "IN" clause (no need to change syntax)
                     }
-                });             
+                });
             }
             return result; // return the original (LINQ) SQL statement - no "IN" clause in SQL statement
         }

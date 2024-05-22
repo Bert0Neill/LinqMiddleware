@@ -23,76 +23,68 @@ namespace DemoLinqContainsOpenJson.Classes
         {
             const int CHUNK_SIZE = 100_000;
 
-            // ConcurrentBag to hold results
+            // ConcurrentBag to hold all results
             var resultBag = new ConcurrentBag<List<LargeTable>>();
 
             // retrieve cached data (1M in each collection)
             List<int> cacheInt = await Retrieve1MCacheIntegerAsync();
-            List<char> cacheChar = await Retrieve1MCacheCharAsync();
-            List<double?> cacheDouble = await Retrieve1MCacheDoubleAsync();
-            List<string> cacheString = await Retrieve1MCacheStringAsync();
+            //List<char> cacheChar = await Retrieve1MCacheCharAsync();
+            //List<double?> cacheDouble = await Retrieve1MCacheDoubleAsync();
+            //List<string> cacheString = await Retrieve1MCacheStringAsync();
 
-            // chunk data into 100K batches for looping
-            var chunkInt = cacheInt.Chunk(CHUNK_SIZE);
-            var chunkChar = cacheChar.Chunk(CHUNK_SIZE);
-            var chunkDouble = cacheDouble.Chunk(CHUNK_SIZE);
-            var chunkString = cacheString.Chunk(CHUNK_SIZE);
+            //// chunk data into 100K batches for looping
+            //var chunkInt = cacheInt.Chunk(CHUNK_SIZE);
+            //var chunkChar = cacheChar.Chunk(CHUNK_SIZE);
+            //var chunkDouble = cacheDouble.Chunk(CHUNK_SIZE);
+            //var chunkString = cacheString.Chunk(CHUNK_SIZE);
 
-            var tskDatabaseQueries = new List<Task>();
+            //var tskDatabaseQueries = new List<Task>();
 
-            // make a call using Integer
-            Console.WriteLine($"Started Linq Contains - integer @{DateTime.Now}");
-            tskDatabaseQueries.Add(Task.Run(async () =>
-            {
-                await Parallel.ForEachAsync(chunkInt, async (sublist, cancellationToken) =>
-                {
-                    var queryResult = await RetrieveIntegerChunk100KAsync(sublist);
-                    resultBag.Add(queryResult);
-                });
-            }));
-            Console.WriteLine($"Finished Linq Contains - integer @{DateTime.Now}");
+            //// make a call using Integer
+            //tskDatabaseQueries.Add(Task.Run(async () =>
+            //{
+            //    await Parallel.ForEachAsync(chunkInt, async (sublist, cancellationToken) =>
+            //    {
+            //        var queryResult = await RetrieveIntegerChunk100KAsync(sublist);
+            //        resultBag.Add(queryResult);
+            //    });
+            //}));
 
-            // make a call using Char
-            Console.WriteLine($"Started Linq Contains - char @{DateTime.Now}");
-            tskDatabaseQueries.Add(Task.Run(async () =>
-            {
-                await Parallel.ForEachAsync(chunkChar, async (sublist, cancellationToken) =>
-                {
-                    var queryResult = await RetrieveCharChunk100KAsync(sublist);
-                    resultBag.Add(queryResult);
-                });
-            }));
-            Console.WriteLine($"Finished Linq Contains - char @{DateTime.Now}");
+            //// make a call using Char
+            //tskDatabaseQueries.Add(Task.Run(async () =>
+            //{
+            //    await Parallel.ForEachAsync(chunkChar, async (sublist, cancellationToken) =>
+            //    {
+            //        var queryResult = await RetrieveCharChunk100KAsync(sublist);
+            //        resultBag.Add(queryResult);
+            //    });
+            //}));
 
-            // make a call using string
-            Console.WriteLine($"Started Linq Contains - string @{DateTime.Now}");
-            tskDatabaseQueries.Add(Task.Run(async () =>
-            {
-                await Parallel.ForEachAsync(chunkString, async (sublist, cancellationToken) =>
-                {
-                    var queryResult = await RetrieveStringChunk100KAsync(sublist);
-                    resultBag.Add(queryResult);
-                });
-            }));
-            Console.WriteLine($"Finished Linq Contains - string @{DateTime.Now}");
+            //// make a call using string
+            //tskDatabaseQueries.Add(Task.Run(async () =>
+            //{
+            //    await Parallel.ForEachAsync(chunkString, async (sublist, cancellationToken) =>
+            //    {
+            //        var queryResult = await RetrieveStringChunk100KAsync(sublist);
+            //        resultBag.Add(queryResult);
+            //    });
+            //}));
 
-            // make a call using Double
-            Console.WriteLine($"Started Linq Contains - double @{DateTime.Now}");
-            tskDatabaseQueries.Add(Task.Run(async () =>
-            {
-                await Parallel.ForEachAsync(chunkDouble, async (sublist, cancellationToken) =>
-                {
-                    var queryResult = await RetrieveDoubleChunk100KAsync(sublist);
-                    resultBag.Add(queryResult);
-                });
-            }));
-            Console.WriteLine($"Finished Linq Contains - double @{DateTime.Now}");
+            //// make a call using Double
+            //tskDatabaseQueries.Add(Task.Run(async () =>
+            //{
+            //    await Parallel.ForEachAsync(chunkDouble, async (sublist, cancellationToken) =>
+            //    {
+            //        var queryResult = await RetrieveDoubleChunk100KAsync(sublist);
+            //        resultBag.Add(queryResult);
+            //    });
+            //}));
 
-            // Wait for all tasks to complete
-            await Task.WhenAll(tskDatabaseQueries);
+            //// Wait for all tasks to complete
+            //await Task.WhenAll(tskDatabaseQueries);
            
-            // display data
-            DisplayQueryResults(resultBag.FirstOrDefault()?.Take(10)?.ToList());
+            //// display data
+            //DisplayQueryResults(resultBag.FirstOrDefault()?.Take(10)?.ToList());
         }
 
         #region Display Results

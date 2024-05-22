@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
 
 namespace DemoLinqContainsOpenJson.DatabaseContext
 {
@@ -9,5 +11,4 @@ namespace DemoLinqContainsOpenJson.DatabaseContext
             return new TContext();
         }
     }
-
 }

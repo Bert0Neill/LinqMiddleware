@@ -2,7 +2,9 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using DemoLinqContainsOpenJson.Classes;
 using DemoLinqContainsOpenJson.Models;
+using LinqOpenJsonInClause;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -25,13 +27,12 @@ public partial class LinqPerformanceDemoContext : DbContext
         var connectionString = config.GetConnectionString("DefaultConnection");
 
         // Configure the context to use SQL Server
-        //optionsBuilder.UseSqlServer(connectionString);
-
-        // Configure the context to use SQL Server
         optionsBuilder.UseSqlServer(connectionString, options =>
         {
-            options.CommandTimeout(180); // Set command timeout (in seconds)
+            options.CommandTimeout(180); // Set command timeout (in seconds)            
         });
+        
+        optionsBuilder.AddInterceptors(new LinqContainsOpenJsonMiddleware()); // add to dbContext here or in Programs.cs
     }
 
     public virtual DbSet<LargeTable> LargeTables { get; set; }
