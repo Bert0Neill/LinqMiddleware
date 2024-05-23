@@ -1,42 +1,35 @@
--- Check if the database exists
-IF EXISTS (SELECT name FROM sys.databases WHERE name = N'LinqPerformanceDemo')
-BEGIN
-    -- Drop the database if it exists
-    DROP DATABASE [LinqPerformanceDemo];
-END
-GO
+use [LinqPerformanceDemo]
 
--- Create a new database
-CREATE DATABASE [LinqPerformanceDemo];
-GO
-
-USE [LinqPerformanceDemo];
-
--- Drop the table if it exists
-IF OBJECT_ID('dbo.LargeTable', 'U') IS NOT NULL
-    DROP TABLE [dbo].[LargeTable];
-GO
-
--- Create table schema
 CREATE TABLE [dbo].[LargeTable](
 	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[CodeName] [varchar](50) NULL,
 	[ProjectRef] [varchar](50) NULL,
 	[ExternalRef] [int] NULL,
 	[StartDate] [datetime] NULL,
-	[IsActive] [bit] NULL,
+	[IsMale] [bit] NULL,
 	[SecurityType] [char](1) NULL,
 	[Height] [float] NULL,
 	[Address] [nvarchar](100) NULL
 );
+
+IF EXISTS (SELECT name FROM sys.indexes WHERE name = 'NonClusteredIndex-SecurityType_Projectref' AND object_id = OBJECT_ID('dbo.LargeTable'))
+BEGIN
+    DROP INDEX [NonClusteredIndex-SecurityType_Projectref] ON [dbo].[LargeTable];
+END
+
+CREATE NONCLUSTERED INDEX [NonClusteredIndex-SecurityType_Projectref] ON [dbo].[LargeTable]
+(
+	[SecurityType] ASC,
+	[ProjectRef] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 
--- Loop and insert 1M records
+
 DECLARE @Counter INT = 0;
 
-WHILE @Counter < 5000000
+WHILE @Counter < 1000000
 BEGIN
-    INSERT INTO dbo.LargeTable ([CodeName], [ProjectRef], [ExternalRef], [StartDate], [IsActive], SecurityType, Height, Address)
+    INSERT INTO dbo.LargeTable ([CodeName], [ProjectRef], [ExternalRef], [StartDate], IsMale, SecurityType, Height, Address)
     VALUES (
         LEFT(NEWID(), 8),  -- Random string
         LEFT(NEWID(), 8),  -- Random string
