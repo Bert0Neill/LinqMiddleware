@@ -22,7 +22,7 @@ namespace DemoLinqContainsOpenJson.Classes
         {
             Console.WriteLine($"Start Time: {DateTime.Now}");
 
-            const int CHUNK_SIZE = 100_000;            
+            const int CHUNK_SIZE = 200_000;            
             var tskDatabaseQueries = new List<Task>(); // maintain the running background tasks
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
             var resultBag = new ConcurrentBag<List<LargeTable>>(); // ConcurrentBag to hold all results safely
