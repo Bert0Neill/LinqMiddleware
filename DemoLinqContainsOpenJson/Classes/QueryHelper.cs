@@ -20,37 +20,36 @@ namespace DemoLinqContainsOpenJson.Classes
 
         public async void StartProcessingAsync()
         {
+            Console.WriteLine($"Start Time: {DateTime.Now}");
+
             const int CHUNK_SIZE = 100_000;
+            var tskDatabaseQueries = new List<Task>(); // maintain the running background tasks
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
+            var resultBag = new ConcurrentBag<List<LargeTable>>(); // ConcurrentBag to hold all results safely
 
-            // ConcurrentBag to hold all results
-            var resultBag = new ConcurrentBag<List<LargeTable>>();
-
-            // retrieve cached data (1M in each collection)
+            // mock a client that uses a cache of data to filter against - retrieve cached data (1M in each collection) - data will be duplicated in cases like char!
             List<int> cacheInt = await Retrieve1MCacheIntegerAsync();
             List<char> cacheChar = await Retrieve1MCacheCharAsync();
             List<double?> cacheDouble = await Retrieve1MCacheDoubleAsync();
             List<string> cacheString = await Retrieve1MCacheStringAsync();
 
-            //// chunk data into 100K batches for looping
+            // chunk data into 100K batches for looping
             var chunkInt = cacheInt.Chunk(CHUNK_SIZE);
             var chunkChar = cacheChar.Chunk(CHUNK_SIZE);
             var chunkDouble = cacheDouble.Chunk(CHUNK_SIZE);
             var chunkString = cacheString.Chunk(CHUNK_SIZE);
 
-            var tskDatabaseQueries = new List<Task>();
+            // make a linq call using Integer as the IN clause
+            tskDatabaseQueries.Add(Task.Run(async () =>
+            {
+                await Parallel.ForEachAsync(chunkInt, parallelOptions, async (sublist, cancellationToken) =>
+                {
+                    var queryResult = await RetrieveIntegerChunkAsync(sublist);
+                    resultBag.Add(queryResult);
+                });
+            }));
 
-            //// make a call using Integer
-            //tskDatabaseQueries.Add(Task.Run(async () =>
-            //{
-            //    await Parallel.ForEachAsync(chunkInt, parallelOptions, async (sublist, cancellationToken) =>
-            //    {
-            //        var queryResult = await RetrieveIntegerChunkAsync(sublist);
-            //        resultBag.Add(queryResult);
-            //    });
-            //}));
-
-            //make a call using Char
+            // make a linq call using Char as the IN clause
             tskDatabaseQueries.Add(Task.Run(async () =>
             {
                 await Parallel.ForEachAsync(chunkChar, parallelOptions, async (sublist, cancellationToken) =>
@@ -60,31 +59,33 @@ namespace DemoLinqContainsOpenJson.Classes
                 });
             }));
 
-            //// make a call using string
-            //tskDatabaseQueries.Add(Task.Run(async () =>
-            //{
-            //    await Parallel.ForEachAsync(chunkString, parallelOptions, async (sublist, cancellationToken) =>
-            //    {
-            //        var queryResult = await RetrieveStringChunkAsync(sublist);
-            //        resultBag.Add(queryResult);
-            //    });
-            //}));
+            // make a linq call using String as the IN clause
+            tskDatabaseQueries.Add(Task.Run(async () =>
+            {
+                await Parallel.ForEachAsync(chunkString, parallelOptions, async (sublist, cancellationToken) =>
+                {
+                    var queryResult = await RetrieveStringChunkAsync(sublist);
+                    resultBag.Add(queryResult);
+                });
+            }));
 
-            //// make a call using Double
-            //tskDatabaseQueries.Add(Task.Run(async () =>
-            //{
-            //    await Parallel.ForEachAsync(chunkDouble, parallelOptions, async (sublist, cancellationToken) =>
-            //    {
-            //        var queryResult = await RetrieveDoubleChunkAsync(sublist);
-            //        resultBag.Add(queryResult);
-            //    });
-            //}));
+            // make a linq call using Double as the IN clause
+            tskDatabaseQueries.Add(Task.Run(async () =>
+            {
+                await Parallel.ForEachAsync(chunkDouble, parallelOptions, async (sublist, cancellationToken) =>
+                {
+                    var queryResult = await RetrieveDoubleChunkAsync(sublist);
+                    resultBag.Add(queryResult);
+                });
+            }));
 
             // Wait for all tasks to complete
             await Task.WhenAll(tskDatabaseQueries);
 
-            // display data
-            DisplayQueryResults(resultBag?.FirstOrDefault()?.ToList());
+            Console.WriteLine($"End Time: {DateTime.Now}");
+
+            // display a snapshot of data to confirm queries worked
+            DisplayQueryResults(resultBag?.FirstOrDefault()?.ToList());            
         }
 
         #region Display Results
@@ -93,9 +94,9 @@ namespace DemoLinqContainsOpenJson.Classes
         /// </summary>
         /// <param name="resultBag">A list containing a model</param>
         private void DisplayQueryResults(List<LargeTable> resultBag)
-        {
-            // Define the width for each column
-            int columnPadding = 10;
+        {            
+            const int columnPadding = 10; // Define the width for each column
+            const int dataSize = 10; // the number of record to display in console
 
             Console.WriteLine($"Result Count: {resultBag.Count}"); 
 
@@ -103,7 +104,7 @@ namespace DemoLinqContainsOpenJson.Classes
             Console.WriteLine($"{"Code Name".PadRight(columnPadding)} | {"Project Ref".PadRight(columnPadding)}");
             Console.WriteLine($"{new string('=', columnPadding)}   {new string('=', columnPadding)}");
 
-            foreach (var record in resultBag.Take(10))
+            foreach (var record in resultBag.Take(dataSize))
             {
                 Console.WriteLine($"{record.CodeName.PadRight(columnPadding)} | {record.ProjectRef.PadRight(columnPadding)}");
             }
