@@ -22,7 +22,7 @@ namespace DemoLinqContainsOpenJson.Classes
         {
             Console.WriteLine($"Start Time: {DateTime.Now}");
 
-            const int CHUNK_SIZE = 100_000;
+            const int CHUNK_SIZE = 100_000;            
             var tskDatabaseQueries = new List<Task>(); // maintain the running background tasks
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
             var resultBag = new ConcurrentBag<List<LargeTable>>(); // ConcurrentBag to hold all results safely
@@ -32,6 +32,12 @@ namespace DemoLinqContainsOpenJson.Classes
             List<char> cacheChar = await Retrieve1MCacheCharAsync();
             List<double?> cacheDouble = await Retrieve1MCacheDoubleAsync();
             List<string> cacheString = await Retrieve1MCacheStringAsync();
+
+            //// test strings with single quote!
+            //int middleIndex = cacheString[1].Length / 2;
+            //cacheString[1] = cacheString[1].Insert(middleIndex, "'");
+            //cacheString[0] = cacheString[0].Insert(middleIndex, "'");
+
 
             // chunk data into 100K batches for looping
             var chunkInt = cacheInt.Chunk(CHUNK_SIZE);
@@ -59,22 +65,22 @@ namespace DemoLinqContainsOpenJson.Classes
                 });
             }));
 
-            // make a linq call using String as the IN clause
-            tskDatabaseQueries.Add(Task.Run(async () =>
-            {
-                await Parallel.ForEachAsync(chunkString, parallelOptions, async (sublist, cancellationToken) =>
-                {
-                    var queryResult = await RetrieveStringChunkAsync(sublist);
-                    resultBag.Add(queryResult);
-                });
-            }));
-
             // make a linq call using Double as the IN clause
             tskDatabaseQueries.Add(Task.Run(async () =>
             {
                 await Parallel.ForEachAsync(chunkDouble, parallelOptions, async (sublist, cancellationToken) =>
                 {
                     var queryResult = await RetrieveDoubleChunkAsync(sublist);
+                    resultBag.Add(queryResult);
+                });
+            }));
+
+            // make a linq call using String as the IN clause
+            tskDatabaseQueries.Add(Task.Run(async () =>
+            {
+                await Parallel.ForEachAsync(chunkString, parallelOptions, async (sublist, cancellationToken) =>
+                {
+                    var queryResult = await RetrieveStringChunkAsync(sublist);
                     resultBag.Add(queryResult);
                 });
             }));

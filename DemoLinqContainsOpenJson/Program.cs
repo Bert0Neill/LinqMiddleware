@@ -33,6 +33,7 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
 
         //options.AddInterceptors(new LinqContainsOpenJsonMiddleware()); // add to dbContext here or in dbContext file
     }, ServiceLifetime.Scoped);
+
 }).Build();
 
 var queryHelper = builder.Services.GetRequiredService<IQueryHelper>(); // create an instance of QueryHelper class

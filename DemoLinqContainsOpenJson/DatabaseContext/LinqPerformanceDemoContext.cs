@@ -7,6 +7,7 @@ using DemoLinqContainsOpenJson.Models;
 using LinqOpenJsonInClause;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DemoLinqContainsOpenJson.DatabaseContext;
@@ -29,9 +30,11 @@ public partial class LinqPerformanceDemoContext : DbContext
         // Configure the context to use SQL Server
         optionsBuilder.UseSqlServer(connectionString, options =>
         {
-            options.CommandTimeout(180); // Set command timeout (in seconds)            
+            options.CommandTimeout(180); // Set command timeout (in seconds)                        
         });
-        
+        optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
+        optionsBuilder.EnableSensitiveDataLogging();
+
         optionsBuilder.AddInterceptors(new LinqContainsOpenJsonMiddleware()); // add to dbContext here or in Programs.cs
     }
 

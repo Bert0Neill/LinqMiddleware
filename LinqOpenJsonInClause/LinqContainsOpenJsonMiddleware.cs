@@ -7,20 +7,8 @@ namespace LinqOpenJsonInClause
 {
     public class LinqContainsOpenJsonMiddleware : DbCommandInterceptor, ILinqContainsOpenJsonMiddleware
     {
-        public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result, CancellationToken cancellationToken = default)
-        {
-            // Extract the SQL statement from the command
-            string sqlStatement = command.CommandText;
-
-            // Convert IN and NOT IN clauses to OPENJSON format
-            string modifiedSqlStatement = ConvertInClausesToOpenJson(sqlStatement);
-
-            // Update the command's SQL statement
-            command.CommandText = modifiedSqlStatement;
-
-            // Return the interception result
-            return new ValueTask<InterceptionResult<DbDataReader>>(result);
-        }
+        // don't generate OpenJson clause if there are less than 100 items within the IN\NOT IN clause
+        const int MINIMUM_ITEM_SIZE = 100;
 
         public override InterceptionResult<DbDataReader> ReaderExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result)
         {
@@ -35,6 +23,21 @@ namespace LinqOpenJsonInClause
 
             // Return the interception result
             return result;
+        }
+
+        public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result, CancellationToken cancellationToken = default)
+        {
+            // Extract the SQL statement from the command
+            string sqlStatement = command.CommandText;
+
+            // Convert IN and NOT IN clauses to OPENJSON format
+            string modifiedSqlStatement = ConvertInClausesToOpenJson(sqlStatement);
+
+            // Update the command's SQL statement
+            command.CommandText = modifiedSqlStatement;
+
+            // Return the interception result
+            return new ValueTask<InterceptionResult<DbDataReader>>(result);
         }
 
         private string ConvertInClausesToOpenJson(string sqlStatement)
@@ -66,44 +69,28 @@ namespace LinqOpenJsonInClause
 
             // Split the values string by commas and trim each value
             string[] valueArray = values.Split(',');
+            if (valueArray.Length < MINIMUM_ITEM_SIZE) return values;
+
+
             foreach (string value in valueArray)
             {
                 // Trim whitespace
-                string trimmedValue = value.Trim();
+                string trimmedValue = value.Trim(); // remove any leading\trailing spaces
 
                 // Check if the value is numeric (integer or double)
-                double doubleValue;
-                bool isNumeric = double.TryParse(trimmedValue, out doubleValue);
-
-                if (isNumeric)
+                if (double.TryParse(trimmedValue, out double doubleValue))
                 {
                     // For numeric values, just add them as is
                     valueList.Add(trimmedValue);
                 }
-                else if (trimmedValue.Length == 1)
-                {
-                    // For single characters, convert to ASCII value
-                    valueList.Add(((int)trimmedValue[0]).ToString());
-                }
                 else
                 {
-                    // For strings, wrap in single quotes
-                    valueList.Add("'" + trimmedValue.Replace("'", "''") + "'");
+                    trimmedValue = trimmedValue.Trim('\''); // remove single quotes from start\end of string                    
+                    valueList.Add("\"" + trimmedValue.Replace("\"", "\\\"") + "\""); // for strings, wrap in double quotes and escape any existing quotes
                 }
             }
 
-            // Decide whether to use OPENJSON or not based on the number of values
-            if (valueList.Count > 100)
-            {
-                // Construct the OPENJSON format
-                return "SELECT value FROM OPENJSON('[" + string.Join(",", valueList) + "]') WITH (Value NVARCHAR(MAX) '$')";
-            }
-            else
-            {
-                // Just return the values
-                return string.Join(",", valueList);
-            }
+            return "SELECT value FROM OPENJSON('[" + string.Join(",", valueList) + "]') WITH (Value NVARCHAR(MAX) '$')";
         }
-
     }
 }
