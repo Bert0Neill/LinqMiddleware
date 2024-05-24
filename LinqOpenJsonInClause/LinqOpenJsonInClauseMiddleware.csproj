@@ -7,30 +7,42 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>performanceIcon.png</PackageIcon>
     <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
-    <Title>EF Core 6\7 OpenJson Middleware For Large Contains Statements</Title>
-    <Authors>Bert O'Neill</Authors>
+    <Title>EF Core 6\7 OpenJson Middleware Boost Large Contains Statements</Title>
+    <Authors>Bert O'Neill, Dani Rubio</Authors>
     <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
-    <PackageTags>EF Core 6 &amp; 7, Improve LINQ Performance, Large Contains</PackageTags>
+    <PackageTags>Entiry framework Core 6, Entiry framework Core 7, EF Core 6 &amp; 7, Improve LINQ Performance, Large Contains</PackageTags>
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl>https://github.com/Bert0Neill/LinqMiddleware</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Description>To vastly improve Linq queries that need to use a large volume of values within their Contains statement (200K+).
 By using Parallel looping and ConcurrentBags, you can execute multiple database request with larger volumes of values within your Contains by using the updated middleware.</Description>
+    <PackageId>Linq.OpenJson.InClause.Middleware</PackageId>
+    <Version>1.0.4</Version>
+    <PackageLicenseFile>MIT-LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.19" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="MIT-LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="ReadMe_Images.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Update="performanceIcon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
-    </None>
-    <None Update="ReadMe.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+    </None>  
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ReadMe.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+
 
 </Project>
