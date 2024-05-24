@@ -1,10 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using DemoLinqContainsOpenJson.DatabaseContext;
+﻿using DemoLinqContainsOpenJson.DatabaseContext;
 using DemoLinqContainsOpenJson.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
-using System;
-using Azure;
-using System.Threading;
+using System.Diagnostics;
 
 namespace DemoLinqContainsOpenJson.Classes
 {
@@ -20,9 +18,12 @@ namespace DemoLinqContainsOpenJson.Classes
 
         public async void StartProcessingAsync()
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             Console.WriteLine($"Start Time: {DateTime.Now}");
 
-            const int CHUNK_SIZE = 200_000;            
+            const int CHUNK_SIZE = 40_000;            
             var tskDatabaseQueries = new List<Task>(); // maintain the running background tasks
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
             var resultBag = new ConcurrentBag<List<LargeTable>>(); // ConcurrentBag to hold all results safely
@@ -91,7 +92,16 @@ namespace DemoLinqContainsOpenJson.Classes
             Console.WriteLine($"End Time: {DateTime.Now}");
 
             // display a snapshot of data to confirm queries worked
-            DisplayQueryResults(resultBag?.FirstOrDefault()?.ToList());            
+            DisplayQueryResults(resultBag?.FirstOrDefault()?.ToList());
+
+            stopwatch.Stop();
+
+            // Get the elapsed time
+            double elapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
+
+            // Display the elapsed time
+            Console.WriteLine($"Elapsed Time: {elapsedTimeInSeconds}");
+
         }
 
         #region Display Results

@@ -29,6 +29,8 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
 }).Build();
 
 var queryHelper = builder.Services.GetRequiredService<IQueryHelper>(); // create an instance of QueryHelper class
+
+
 queryHelper.StartProcessingAsync(); // start processing
 
 Console.WriteLine("\r\nPress any key to continue ...");

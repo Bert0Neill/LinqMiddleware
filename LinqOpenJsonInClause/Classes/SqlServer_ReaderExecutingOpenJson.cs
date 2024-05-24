@@ -9,7 +9,7 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
     public class SqlServerReaderExecutingOpenJson : DbCommandInterceptor, ILinqOpenJsonMiddleware
     {
         #region Class variables
-        const int MINIMUM_ITEM_SIZE = 100; // don't generate OpenJson clause if there are less than 100 items within the IN\NOT IN clause
+        const int MINIMUM_ITEM_SIZE = 20_000; // don't generate OpenJson clause if there are less than 20k items within the IN\NOT IN clause. old EF performs well under this!
         #endregion
 
         #region Override methods
