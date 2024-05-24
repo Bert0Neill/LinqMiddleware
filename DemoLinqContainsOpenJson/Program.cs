@@ -9,18 +9,16 @@ using System.Collections.Concurrent;
 using DemoLinqContainsOpenJson.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using LinqOpenJsonInClause;
+using LinqOpenJsonInClauseMiddleware.Interfaces;
+using LinqOpenJsonInClauseMiddleware.Classes;
 
 var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, services) =>
 {
-    //services.AddDbContext<LinqPerformanceDemoContext>();
-
     services.AddTransient<IQueryHelper, QueryHelper>(); // DI helper class
-    services.AddTransient<ILinqContainsOpenJsonMiddleware, LinqContainsOpenJsonMiddleware>(); // DI helper class
+//    services.AddTransient<ILinqOpenJsonMiddleware, SqlServerReaderExecutingOpenJson>(); // DI helper class
 
     services.AddDbContextFactory<LinqPerformanceDemoContext>(options =>
     {
-        // Configure your DbContext options here if needed
         options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
 
         //options.AddInterceptors(new LinqContainsOpenJsonMiddleware()); // add to dbContext here or in dbContext file
@@ -28,7 +26,6 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
 
     services.AddDbContext<LinqPerformanceDemoContext>(options =>
     {
-        // Configure your DbContext options here if needed
         options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
 
         //options.AddInterceptors(new LinqContainsOpenJsonMiddleware()); // add to dbContext here or in dbContext file

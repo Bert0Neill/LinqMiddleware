@@ -2,44 +2,29 @@
 using System.Data.Common;
 using System.Text.RegularExpressions;
 using System.Text;
+using LinqOpenJsonInClauseMiddleware.Interfaces;
 
-namespace LinqOpenJsonInClause
+namespace LinqOpenJsonInClauseMiddleware.Classes
 {
-    public class LinqContainsOpenJsonMiddleware : DbCommandInterceptor, ILinqContainsOpenJsonMiddleware
+    public class MySqlReaderExecutingOpenJson : DbCommandInterceptor, ILinqOpenJsonMiddleware
     {
-        // don't generate OpenJson clause if there are less than 100 items within the IN\NOT IN clause
-        const int MINIMUM_ITEM_SIZE = 100;
+        #region Class variables
+        const int MINIMUM_ITEM_SIZE = 100; // don't generate OpenJson clause if there are less than 100 items within the IN\NOT IN clause
+        #endregion
 
+        #region Override methods
         public override InterceptionResult<DbDataReader> ReaderExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result)
         {
-            // Extract the SQL statement from the command
-            string sqlStatement = command.CommandText;
-
-            // Convert IN and NOT IN clauses to OPENJSON format
-            string modifiedSqlStatement = ConvertInClausesToOpenJson(sqlStatement);
-
-            // Update the command's SQL statement
-            command.CommandText = modifiedSqlStatement;
-
-            // Return the interception result
-            return result;
+            throw new NotImplementedException();
         }
 
         public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result, CancellationToken cancellationToken = default)
         {
-            // Extract the SQL statement from the command
-            string sqlStatement = command.CommandText;
-
-            // Convert IN and NOT IN clauses to OPENJSON format
-            string modifiedSqlStatement = ConvertInClausesToOpenJson(sqlStatement);
-
-            // Update the command's SQL statement
-            command.CommandText = modifiedSqlStatement;
-
-            // Return the interception result
-            return new ValueTask<InterceptionResult<DbDataReader>>(result);
+            throw new NotImplementedException();
         }
+        #endregion
 
+        #region Helper Methods
         private string ConvertInClausesToOpenJson(string sqlStatement)
         {
             // Define regular expressions to match IN or NOT IN clauses
@@ -92,5 +77,6 @@ namespace LinqOpenJsonInClause
 
             return "SELECT value FROM OPENJSON('[" + string.Join(",", valueList) + "]') WITH (Value NVARCHAR(MAX) '$')";
         }
+        #endregion
     }
 }
