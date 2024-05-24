@@ -10,8 +10,7 @@ Within the **IN** and **NOT IN** clauses the following datatypes have been cater
  1. Integer
  2. Double | Decimal | Float
  3. String
- 4. Char
-
+ 
 # Update Your Code
 
 There are two places that you can update your code, just pick the one that best fits your project type:
