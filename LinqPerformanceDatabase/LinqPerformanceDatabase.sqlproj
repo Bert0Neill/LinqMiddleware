@@ -64,6 +64,6 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\LargeTable.sql" />
-    <None Include="Misc\Create Table with 1M records.sql" />
+    <Build Include="Misc\SQL Server - Create Table with 1M records.sql" />
   </ItemGroup>
 </Project>
