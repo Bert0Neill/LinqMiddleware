@@ -1,6 +1,6 @@
 ﻿using DemoLinqContainsOpenJson.Classes;
 using DemoLinqContainsOpenJson.DatabaseContext;
-using LinqOpenJsonInClauseMiddleware.Classes;
+//using LinqOpenJsonInClauseMiddleware.Classes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +14,7 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
     {
         options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
 
-        options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
+        //options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
 
     }, ServiceLifetime.Scoped);
 
@@ -22,7 +22,7 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
     {
         options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
 
-        options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
+        //options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
 
     }, ServiceLifetime.Scoped);
 

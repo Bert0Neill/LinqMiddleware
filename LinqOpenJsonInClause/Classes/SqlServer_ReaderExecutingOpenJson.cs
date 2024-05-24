@@ -51,18 +51,18 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
             Regex inRegex = new Regex(@"\bIN\s*\((.*?)\)", RegexOptions.IgnoreCase);
             Regex notInRegex = new Regex(@"\bNOT\s+IN\s*\((.*?)\)", RegexOptions.IgnoreCase);
 
-            // Find all IN clauses and replace them with OPENJSON format
-            string result = inRegex.Replace(sqlStatement, match =>
-            {
-                string values = match.Groups[1].Value.Trim();
-                return "IN (" + ConvertToOpenJson(values) + ")";
-            });
-
             // Find all NOT IN clauses and replace them with OPENJSON format
-            result = notInRegex.Replace(result, match =>
+            string result = notInRegex.Replace(sqlStatement, match =>
             {
                 string values = match.Groups[1].Value.Trim();
                 return "NOT IN (" + ConvertToOpenJson(values) + ")";
+            });
+
+            // Find all IN clauses and replace them with OPENJSON format
+            result = inRegex.Replace(result, match =>
+            {
+                string values = match.Groups[1].Value.Trim();
+                return "IN (" + ConvertToOpenJson(values) + ")";
             });
 
             return result;
