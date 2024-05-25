@@ -16,7 +16,7 @@ CREATE TABLE LargeTable (
     ProjectRef VARCHAR(50) NULL,
     ExternalRef INT NULL,
     StartDate DATETIME NULL,
-    IsMale BOOLEAN NULL,
+    IsActive BOOLEAN NULL,
     SecurityType CHAR(1) NULL,
     Height FLOAT NULL,
     Address NVARCHAR(100) NULL

@@ -68,6 +68,34 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
             return result;
         }
 
+        //private string ConvertToJsonTable(string values)
+        //{
+        //    List<string> valueList = new List<string>();
+
+        //    // Split the values string by commas and trim each value
+        //    string[] valueArray = values.Split(',');
+        //    foreach (string value in valueArray)
+        //    {
+        //        // Trim whitespace
+        //        string trimmedValue = value.Trim();
+
+        //        // Check if the value is numeric (integer or double)
+        //        if (double.TryParse(trimmedValue, out double doubleValue))
+        //        {
+        //            // For numeric values, just add them as is
+        //            valueList.Add(trimmedValue);
+        //        }
+        //        else
+        //        {
+        //            trimmedValue = trimmedValue.Trim('\''); // remove single quotes from start\end of string                    
+        //            valueList.Add($"'\"{trimmedValue.Replace("\"", "\\\"")}\"'"); // for strings, wrap in double quotes and escape any existing quotes
+        //        }
+        //    }
+
+        //    string jsonArray = "[" + string.Join(",", valueList) + "]";
+        //    return $"SELECT value FROM JSON_TABLE('{jsonArray}', '$[*]' COLUMNS(value VARCHAR(255) PATH '$')) AS jt";
+        //}
+
         private string ConvertToJsonTable(string values)
         {
             List<string> valueList = new List<string>();
@@ -80,15 +108,16 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
                 string trimmedValue = value.Trim();
 
                 // Check if the value is numeric (integer or double)
-                if (double.TryParse(trimmedValue, out double doubleValue))
+                if (double.TryParse(trimmedValue, out _))
                 {
                     // For numeric values, just add them as is
                     valueList.Add(trimmedValue);
                 }
                 else
                 {
-                    trimmedValue = trimmedValue.Trim('\''); // remove single quotes from start\end of string                    
-                    valueList.Add($"'\"{trimmedValue.Replace("\"", "\\\"")}\"'"); // for strings, wrap in double quotes and escape any existing quotes
+                    // For string values, ensure proper JSON formatting
+                    trimmedValue = trimmedValue.Trim('\''); // Remove single quotes from start and end of string
+                    valueList.Add($"\\\"{trimmedValue.Replace("\\", "\\\\").Replace("\"", "\\\"")}\\\""); // Properly escape double quotes and backslashes
                 }
             }
 

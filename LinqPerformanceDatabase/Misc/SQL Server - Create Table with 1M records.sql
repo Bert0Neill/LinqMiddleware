@@ -22,7 +22,7 @@ CREATE TABLE [dbo].[LargeTable](
 	[ProjectRef] [varchar](50) NULL,
 	[ExternalRef] [int] NULL,
 	[StartDate] [datetime] NULL,
-	[IsMale] [bit] NULL,
+	[IsActive] [bit] NULL,
 	[SecurityType] [char](1) NULL,
 	[Height] [float] NULL,
 	[Address] [nvarchar](100) NULL

@@ -31,14 +31,15 @@ public partial class LinqPerformanceDemoContext : DbContext
         //});
         //optionsBuilder.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in Programs.cs
 
-        // Configure the context to use MySQL         
-        optionsBuilder.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 23)), options =>
-        {
-            options.CommandTimeout(180); // Set command timeout (in seconds)                        
-        });
+        //// Configure the context to use MySQL         
+        //optionsBuilder.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 37)), options =>
+        //{
+        //    options.CommandTimeout(180); // Set command timeout (in seconds)
+        //});
         optionsBuilder.AddInterceptors(new MySqlReaderExecutingOpenJson()); // add to dbContext here or in Programs.cs
 
-        optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
+        //optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
+        optionsBuilder.LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, Microsoft.Extensions.Logging.LogLevel.Information);
         optionsBuilder.EnableSensitiveDataLogging();
     }
 
