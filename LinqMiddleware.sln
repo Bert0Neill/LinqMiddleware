@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqOpenJsonInClauseMiddleware", "LinqOpenJsonInClause\LinqOpenJsonInClauseMiddleware.csproj", "{4BD2B5B8-5AE4-4E67-966B-35F12E5A63AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinqOpenJsonInClauseMiddleware", "LinqOpenJsonInClause\LinqOpenJsonInClauseMiddleware.csproj", "{4BD2B5B8-5AE4-4E67-966B-35F12E5A63AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoLinqContainsOpenJson", "DemoLinqContainsOpenJson\DemoLinqContainsOpenJson.csproj", "{23CC0F78-DF8E-4ED4-8495-B2A256855967}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoLinqContainsOpenJson", "DemoLinqContainsOpenJson\DemoLinqContainsOpenJson.csproj", "{23CC0F78-DF8E-4ED4-8495-B2A256855967}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "LinqPerformanceDatabase", "LinqPerformanceDatabase\LinqPerformanceDatabase.sqlproj", "{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}"
 EndProject
@@ -27,7 +27,6 @@ Global
 		{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{00A5672A-87CC-42D6-ACA6-70D72F95EA8E}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
