@@ -5,6 +5,8 @@ using LinqOpenJsonInClauseMiddleware.Classes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DemoLinqContainsOpenJson.DatabaseContext;
 
@@ -22,15 +24,22 @@ public partial class LinqPerformanceDemoContext : DbContext
         
         var connectionString = config.GetConnectionString("DefaultConnection"); // Get connection string
 
-        // Configure the context to use SQL Server
-        optionsBuilder.UseSqlServer(connectionString, options =>
+        //// Configure the context to use SQL Server
+        //optionsBuilder.UseSqlServer(connectionString, options =>
+        //{
+        //    options.CommandTimeout(180); // Set command timeout (in seconds)                        
+        //});
+        //optionsBuilder.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in Programs.cs
+
+        // Configure the context to use MySQL         
+        optionsBuilder.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 23)), options =>
         {
             options.CommandTimeout(180); // Set command timeout (in seconds)                        
         });
+        optionsBuilder.AddInterceptors(new MySqlReaderExecutingOpenJson()); // add to dbContext here or in Programs.cs
+
         optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
         optionsBuilder.EnableSensitiveDataLogging();
-
-        optionsBuilder.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in Programs.cs
     }
 
     public virtual DbSet<LargeTable> LargeTables { get; set; }
