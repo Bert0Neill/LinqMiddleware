@@ -16,8 +16,8 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
         options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
         //options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
 
-        // MySQL
-        options.UseMySql(context.Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 23)));
+        //// MySQL
+        //options.UseMySql(context.Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 23)));
 
     }, ServiceLifetime.Scoped);
 
@@ -27,8 +27,8 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
         options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
         //options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
 
-        // MySQL
-        options.UseMySql(context.Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 23)));
+        //// MySQL
+        //options.UseMySql(context.Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 23)));
 
     }, ServiceLifetime.Scoped);
 

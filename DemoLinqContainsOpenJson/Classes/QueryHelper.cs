@@ -23,13 +23,13 @@ namespace DemoLinqContainsOpenJson.Classes
 
             Console.WriteLine($"Start Time: {DateTime.Now}");
 
-            const int CHUNK_SIZE = 10;            
+            const int CHUNK_SIZE = 100_000;            
             var tskDatabaseQueries = new List<Task>(); // maintain the running background tasks
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
             var resultBag = new ConcurrentBag<List<LargeTable>>(); // ConcurrentBag to hold all results safely
 
             // mock a client that uses a cache of data to filter against - retrieve cached data (1M in each collection) - data will be duplicated in cases like char!
-            List<int> cacheInt = await Retrieve1MCacheIntegerAsync(100);
+            List<int> cacheInt = await Retrieve1MCacheIntegerAsync();
             List<char> cacheChar = await Retrieve1MCacheCharAsync();
             List<double?> cacheDouble = await Retrieve1MCacheDoubleAsync();
             List<string> cacheString = await Retrieve1MCacheStringAsync();

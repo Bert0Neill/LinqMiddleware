@@ -17,7 +17,7 @@
     <Description>To vastly improve Linq queries that need to use a large volume of values within their Contains statement (200K+).
 By using Parallel looping and ConcurrentBags, you can execute multiple database request with larger volumes of values within your Contains by using the updated middleware.</Description>
     <PackageId>Linq.OpenJson.InClause.Middleware</PackageId>
-    <Version>1.0.9</Version>
+    <Version>1.0.10</Version>
     <PackageLicenseFile>MIT-LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
   

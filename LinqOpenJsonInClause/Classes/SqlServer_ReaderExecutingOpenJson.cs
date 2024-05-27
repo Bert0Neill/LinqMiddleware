@@ -28,7 +28,8 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
             return result;
         }
 
-        public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result, CancellationToken cancellationToken = default)
+        public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command, CommandEventData eventData, 
+            InterceptionResult<DbDataReader> result, CancellationToken cancellationToken = default)
         {
             // Extract the SQL statement from the command
             string sqlStatement = command.CommandText;
@@ -71,32 +72,43 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
         private string ConvertToOpenJson(string values)
         {
             List<string> valueList = new List<string>();
+            List<string> typeList = new List<string>();
 
             // Split the values string by commas and trim each value
             string[] valueArray = values.Split(',');
             if (valueArray.Length < MINIMUM_ITEM_SIZE) return values;
-
 
             foreach (string value in valueArray)
             {
                 // Trim whitespace
                 string trimmedValue = value.Trim(); // remove any leading\trailing spaces
 
-                // Check if the value is numeric (integer or double)
-                if (double.TryParse(trimmedValue, out double doubleValue))
+                // Check if the value is integer, double or default to NVarchar
+                if (int.TryParse(trimmedValue, out int intValue))
                 {
-                    // For numeric values, just add them as is
+                    // For integer values, add them as is
                     valueList.Add(trimmedValue);
+                    typeList.Add("Value INT '$'");
+                }
+                else if (double.TryParse(trimmedValue, out double doubleValue))
+                {
+                    // For non-integer numeric values, add them as is (assuming they will be cast to NVARCHAR(MAX))
+                    valueList.Add(trimmedValue);
+                    typeList.Add("Value NVARCHAR(MAX) '$'");
                 }
                 else
                 {
                     trimmedValue = trimmedValue.Trim('\''); // remove single quotes from start\end of string                    
                     valueList.Add("\"" + trimmedValue.Replace("\"", "\\\"") + "\""); // for strings, wrap in double quotes and escape any existing quotes
+                    typeList.Add("Value NVARCHAR(MAX) '$'");
                 }
             }
 
-            return "SELECT value FROM OPENJSON('[" + string.Join(",", valueList) + "]') WITH (Value NVARCHAR(MAX) '$')";
-        }
+            // Ensure that all types in the typeList are the same; otherwise, this approach will not work directly in SQL Server
+            string typeDeclaration = typeList.Contains("Value NVARCHAR(MAX) '$'") ? "Value NVARCHAR(MAX) '$'" : "Value INT '$'";
+
+            return "SELECT value FROM OPENJSON('[" + string.Join(",", valueList) + "]') WITH (" + typeDeclaration + ")";
+        }        
         #endregion
     }
 }
