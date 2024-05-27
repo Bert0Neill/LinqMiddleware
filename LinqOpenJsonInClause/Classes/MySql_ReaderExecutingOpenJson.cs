@@ -10,7 +10,7 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
     internal class MySqlReaderExecutingOpenJson : DbCommandInterceptor, ILinqOpenJsonMiddleware
     {
         #region Class variables
-        const int MINIMUM_ITEM_SIZE = 100; // as queries can be complex and have multiple IN claues, best to implement OpenJson all the time
+        const int MINIMUM_ITEM_SIZE = 1000; // as queries can be complex and have multiple IN claues, best to implement OpenJson all the time
         #endregion
 
         #region Override methods
@@ -47,146 +47,102 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
 
         #region Helper Methods
 
-        private string ConvertInClausesToJsonContains(string sqlQuery)
+        public static string ConvertInClausesToJsonContains(string tsqlQuery)
         {
+            // Regex to match IN clauses and extract the column name and the values
+            string inClausePattern = @"\b(?<column>\w+)\b IN \((?<values>[\d,\s]+)\)";
+            string notInClausePattern = @"\b(?<column>\w+)\b NOT IN \((?<values>'?\w+'?(, '?\w+'?)*)\)";
 
-            // Regex pattern to match IN and NOT IN clauses
-            string pattern = @"(\w+)\s+(NOT\s+)?IN\s*\(([^)]+)\)";
-            MatchCollection matches = Regex.Matches(sqlQuery, pattern, RegexOptions.IgnoreCase);
-
-            foreach (Match match in matches)
+            // Replace IN clauses with JSON_CONTAINS
+            tsqlQuery = Regex.Replace(tsqlQuery, inClausePattern, match =>
             {
-                string field = match.Groups[1].Value;
-                string notInClause = match.Groups[2].Value; // "NOT " if it's a NOT IN clause, otherwise empty
-                string values = match.Groups[3].Value;
-                List<string> valueList = new List<string>(values.Split(new[] { ", " }, StringSplitOptions.None));
+                string column = match.Groups["column"].Value;
+                string values = match.Groups["values"].Value;
+                string jsonArray = $"[{string.Join(", ", values.Split(',').Select(v => v.Trim()))}]";
+                return $"JSON_CONTAINS(CAST('{jsonArray}' AS JSON), CAST({column} AS JSON))";
+            });
 
-                // Construct JSON array string
-                string jsonArray = string.Join(", ", valueList);
+            // Replace NOT IN clauses with NOT JSON_CONTAINS
+            tsqlQuery = Regex.Replace(tsqlQuery, notInClausePattern, match =>
+            {
+                string column = match.Groups["column"].Value;
+                string values = match.Groups["values"].Value;
+                string jsonArray = $"[{string.Join(", ", values.Split(',').Select(v => $"\"{v.Trim().Trim('\'')}\""))}]";
+                return $"NOT JSON_CONTAINS(CAST('{jsonArray}' AS JSON), JSON_QUOTE({column}))";
+            });
 
-                // Construct the JSON_CONTAINS or NOT JSON_CONTAINS clause with casting
-                string jsonContainsClause;
-                if (string.IsNullOrEmpty(notInClause))
-                {
-                    jsonContainsClause = $"JSON_CONTAINS(CAST('[{jsonArray}]' AS JSON), CAST({field} AS JSON))";
-                }
-                else
-                {
-                    // Check for NULL values in addition to JSON_CONTAINS
-                    jsonContainsClause = $"NOT JSON_CONTAINS(CAST('[{jsonArray}]' AS JSON), CAST({field} AS JSON)) OR {field} IS NULL";
-                }
+            // Adjust for table aliases and ensure proper syntax
+            tsqlQuery = tsqlQuery.Replace("`", ""); // Remove any backticks
+            tsqlQuery = Regex.Replace(tsqlQuery, @"(\s|\()l\.", " "); // Remove table alias prefixes in function calls
 
-                // Replace the original IN/NOT IN clause with JSON_CONTAINS/NOT JSON_CONTAINS
-                sqlQuery = sqlQuery.Replace(match.Value, jsonContainsClause);
-            }
-
-            return sqlQuery;
-
-            // // Define regular expressions to match IN or NOT IN clauses and their respective field names
-            // Regex inRegex = new Regex(@"(\b\w+)\s+IN\s*\((.*?)\)", RegexOptions.IgnoreCase);
-            //Regex notInRegex = new Regex(@"(\b\w+)\s+NOT\s+IN\s*\((.*?)\)", RegexOptions.IgnoreCase);
-
-
-
-            // // Find all NOT IN clauses and replace them with JSON_CONTAINS format
-            // string result = notInRegex.Replace(sqlStatement, match =>
-            // {
-            //     string fieldName = match.Groups[1].Value.Trim();
-            //     string values = match.Groups[2].Value.Trim();
-            //     return "NOT JSON_CONTAINS(" + ConvertToJSONArray(values) + ", `" + fieldName + "`)";
-            // });
-
-            // // Find all IN clauses and replace them with JSON_CONTAINS format
-            // result = inRegex.Replace(result, match =>
-            // {
-            //     string fieldName = match.Groups[1].Value.Trim();
-            //     string values = match.Groups[2].Value.Trim();
-            //     return "JSON_CONTAINS(" + ConvertToJSONArray(values) + ", `" + fieldName + "`)";
-            // });
-
-
-
-            // return result;
-
+            return tsqlQuery;
         }
 
-        private string ConvertToJSONArray(string values)
-        {
-            // Split the values string by commas and trim each value
-            string[] valueArray = values.Split(',');
-            List<string> jsonValues = new List<string>();
-
-            foreach (string value in valueArray)
-            {
-                // Trim whitespace
-                string trimmedValue = value.Trim();
-
-                // Check if the value is numeric (integer or double)
-                if (double.TryParse(trimmedValue, out _))
-                {
-                    // For numeric values, just add them as is
-                    jsonValues.Add(trimmedValue);
-                }
-                else
-                {
-                    trimmedValue = trimmedValue.Trim('\''); // remove single quotes from start/end of string
-                    jsonValues.Add($"JSON_QUOTE(\"{trimmedValue}\")"); // wrap string values with JSON_QUOTE
-                }
-            }
-
-            string jsonArray = $"JSON_ARRAY({string.Join(",", jsonValues)})";
-            return jsonArray;
-        }
-
-        //private string ConvertInClausesToJsonTable(string sqlStatement)
+        //private string ConvertInClausesToJsonContains(string sqlQuery)
         //{
-        //    // Define regular expressions to match IN or NOT IN clauses
-        //    Regex inRegex = new Regex(@"\bIN\s*\((.*?)\)", RegexOptions.IgnoreCase);
-        //    Regex notInRegex = new Regex(@"\bNOT\s+IN\s*\((.*?)\)", RegexOptions.IgnoreCase);
 
-        //    // Find all NOT IN clauses and replace them with JSON_TABLE format
-        //    string result = notInRegex.Replace(sqlStatement, match =>
+        //    // Regex pattern to match IN and NOT IN clauses
+        //    string pattern = @"(\w+)\s+(NOT\s+)?IN\s*\(([^)]+)\)";
+        //    MatchCollection matches = Regex.Matches(sqlQuery, pattern, RegexOptions.IgnoreCase);
+
+        //    foreach (Match match in matches)
         //    {
-        //        string values = match.Groups[1].Value.Trim();
-        //        return "NOT IN (" + ConvertToJsonTable(values) + ")";
-        //    });
+        //        string field = match.Groups[1].Value;
+        //        string notInClause = match.Groups[2].Value; // "NOT " if it's a NOT IN clause, otherwise empty
+        //        string values = match.Groups[3].Value;
+        //        List<string> valueList = new List<string>(values.Split(new[] { ", " }, StringSplitOptions.None));
 
-        //    // Find all IN clauses and replace them with JSON_TABLE format
-        //    result = inRegex.Replace(result, match =>
-        //    {
-        //        string values = match.Groups[1].Value.Trim();
-        //        return "IN (" + ConvertToJsonTable(values) + ")";
-        //    });
+        //        // Construct JSON array string
+        //        string jsonArray = string.Join(", ", valueList);
 
-        //    return result;
+        //        // Construct the JSON_CONTAINS or NOT JSON_CONTAINS clause with casting
+        //        string jsonContainsClause;
+        //        if (string.IsNullOrEmpty(notInClause))
+        //        {
+        //            jsonContainsClause = $"JSON_CONTAINS(CAST('[{jsonArray}]' AS JSON), CAST({field} AS JSON))";
+        //        }
+        //        else
+        //        {
+        //            // Check for NULL values in addition to JSON_CONTAINS
+        //            jsonContainsClause = $"NOT JSON_CONTAINS(CAST('[{jsonArray}]' AS JSON), CAST({field} AS JSON)) OR {field} IS NULL";
+        //        }
+
+        //        // Replace the original IN/NOT IN clause with JSON_CONTAINS/NOT JSON_CONTAINS
+        //        sqlQuery = sqlQuery.Replace(match.Value, jsonContainsClause);
+        //    }
+
+        //    return sqlQuery;
         //}
-        //private string ConvertToJsonTable(string values)
-        //{
-        //    List<string> valueList = new List<string>();
 
+        //private string ConvertToJSONArray(string values)
+        //{
         //    // Split the values string by commas and trim each value
         //    string[] valueArray = values.Split(',');
+        //    List<string> jsonValues = new List<string>();
+
         //    foreach (string value in valueArray)
         //    {
         //        // Trim whitespace
         //        string trimmedValue = value.Trim();
 
         //        // Check if the value is numeric (integer or double)
-        //        if (double.TryParse(trimmedValue, out double doubleValue))
+        //        if (double.TryParse(trimmedValue, out _))
         //        {
         //            // For numeric values, just add them as is
-        //            valueList.Add(trimmedValue);
+        //            jsonValues.Add(trimmedValue);
         //        }
         //        else
         //        {
-        //            trimmedValue = trimmedValue.Trim('\''); // remove single quotes from start\end of string                    
-        //            valueList.Add($"'\"{trimmedValue.Replace("\"", "\\\"")}\"'"); // for strings, wrap in double quotes and escape any existing quotes
+        //            trimmedValue = trimmedValue.Trim('\''); // remove single quotes from start/end of string
+        //            jsonValues.Add($"JSON_QUOTE(\"{trimmedValue}\")"); // wrap string values with JSON_QUOTE
         //        }
         //    }
 
-        //    string jsonArray = "[" + string.Join(",", valueList) + "]";
-        //    return $"SELECT value FROM JSON_TABLE('{jsonArray}', '$[*]' COLUMNS(value VARCHAR(255) PATH '$')) AS jt";
+        //    string jsonArray = $"JSON_ARRAY({string.Join(",", jsonValues)})";
+        //    return jsonArray;
         //}
+
+
 
         #endregion
     }

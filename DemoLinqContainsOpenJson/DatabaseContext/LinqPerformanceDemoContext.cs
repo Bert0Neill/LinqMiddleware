@@ -27,6 +27,7 @@ public partial class LinqPerformanceDemoContext : DbContext
         {
             options.CommandTimeout(180); // Set command timeout (in seconds)                        
         });
+
         optionsBuilder.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in Programs.cs
 
         //// Configure the context to use MySQL         
@@ -34,6 +35,7 @@ public partial class LinqPerformanceDemoContext : DbContext
         //{
         //    options.CommandTimeout(180); // Set command timeout (in seconds)
         //});
+
         //optionsBuilder.AddInterceptors(new MySqlReaderExecutingOpenJson()); // add to dbContext here or in Programs.cs
 
         optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);

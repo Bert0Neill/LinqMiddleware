@@ -13,7 +13,7 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
     services.AddDbContextFactory<LinqPerformanceDemoContext>(options =>
     {
         // SQL Server
-        options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
+        //options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));        
         //options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
 
         //// MySQL
@@ -24,7 +24,7 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
     services.AddDbContext<LinqPerformanceDemoContext>(options =>
     {
         // SQL Server
-        options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
+        //options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
         //options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
 
         //// MySQL

@@ -80,6 +80,7 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
 
 # Limitations
 
- 1. Currently only SQL Server 2016+ will be able to execute SQL statements with **OpenJson**. Going forward, we plan to extend this functionality to other databases (MySQL for e.g.) 
+ 1. Currently only SQL Server 2016+ will be able to execute SQL statements with **OpenJson**.
  2. [Entity Framework Core 8 Nuget](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore) package already has this functionality implemented. 
+ 3. For MySQL users, use the **Pomelo.EntityFrameworkCore.MySql** package, this already caters for large amounts of values within your IN clause.
  
