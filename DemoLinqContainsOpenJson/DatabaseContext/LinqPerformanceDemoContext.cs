@@ -24,22 +24,21 @@ public partial class LinqPerformanceDemoContext : DbContext
         
         var connectionString = config.GetConnectionString("DefaultConnection"); // Get connection string
 
-        //// Configure the context to use SQL Server
-        //optionsBuilder.UseSqlServer(connectionString, options =>
-        //{
-        //    options.CommandTimeout(180); // Set command timeout (in seconds)                        
-        //});
-        //optionsBuilder.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in Programs.cs
+        // Configure the context to use SQL Server
+        optionsBuilder.UseSqlServer(connectionString, options =>
+        {
+            options.CommandTimeout(180); // Set command timeout (in seconds)                        
+        });
+        optionsBuilder.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in Programs.cs
 
         //// Configure the context to use MySQL         
         //optionsBuilder.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 37)), options =>
         //{
         //    options.CommandTimeout(180); // Set command timeout (in seconds)
         //});
-        optionsBuilder.AddInterceptors(new MySqlReaderExecutingOpenJson()); // add to dbContext here or in Programs.cs
+        //optionsBuilder.AddInterceptors(new MySqlReaderExecutingOpenJson()); // add to dbContext here or in Programs.cs
 
-        //optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
-        optionsBuilder.LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, Microsoft.Extensions.Logging.LogLevel.Information);
+        optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
         optionsBuilder.EnableSensitiveDataLogging();
     }
 

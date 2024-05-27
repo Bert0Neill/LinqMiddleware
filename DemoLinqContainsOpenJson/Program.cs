@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 
 var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, services) =>
 {
@@ -14,8 +13,8 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
     services.AddDbContextFactory<LinqPerformanceDemoContext>(options =>
     {
         // SQL Server
-        //options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
-        ////options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
+        options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
+        //options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
 
         // MySQL
         options.UseMySql(context.Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 23)));
@@ -25,8 +24,8 @@ var builder = Host.CreateDefaultBuilder(args).ConfigureServices((context, servic
     services.AddDbContext<LinqPerformanceDemoContext>(options =>
     {
         // SQL Server
-        //options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));        
-        ////options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
+        options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
+        //options.AddInterceptors(new SqlServerReaderExecutingOpenJson()); // add to dbContext here or in dbContext file
 
         // MySQL
         options.UseMySql(context.Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 23)));
