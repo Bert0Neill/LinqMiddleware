@@ -1,0 +1,19 @@
+﻿dotnet nuget push ".\bin\Release\Linq.OpenJson.InClause.Middleware.1.0.12.nupkg" --source "github"
+
+-- change package numbering
+
+/*
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="github" value="https://nuget.pkg.github.com/Bert0Neill/index.json" />
+  </packageSources>
+  <packageSourceCredentials>
+    <github>
+      <add key="Username" value="Bert0Neill" />
+      <add key="ClearTextPassword" value="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" />
+    </github>
+  </packageSourceCredentials>
+</configuration>
+*/
