@@ -5,8 +5,6 @@ using LinqOpenJsonInClauseMiddleware.Classes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DemoLinqContainsOpenJson.DatabaseContext;
 
