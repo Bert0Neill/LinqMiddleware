@@ -23,70 +23,92 @@ namespace DemoLinqContainsOpenJson.Classes
 
             Console.WriteLine($"Start Time: {DateTime.Now}");
 
-            const int CHUNK_SIZE = 100_000;            
-            var tskDatabaseQueries = new List<Task>(); // maintain the running background tasks
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
-            var resultBag = new ConcurrentBag<List<LargeTable>>(); // ConcurrentBag to hold all results safely
-
-            // mock a client that uses a cache of data to filter against - retrieve cached data (1M in each collection) - data will be duplicated in cases like char!
-            List<int> cacheInt = await Retrieve1MCacheIntegerAsync();
-            List<char> cacheChar = await Retrieve1MCacheCharAsync();
-            List<double?> cacheDouble = await Retrieve1MCacheDoubleAsync();
-            List<string> cacheString = await Retrieve1MCacheStringAsync();
-
-            // chunk data into 100K batches for looping
-            var chunkInt = cacheInt.Chunk(CHUNK_SIZE);
-            var chunkChar = cacheChar.Chunk(CHUNK_SIZE);
-            var chunkDouble = cacheDouble.Chunk(CHUNK_SIZE);
-            var chunkString = cacheString.Chunk(CHUNK_SIZE);
-
-            // make a linq call using Integer as the IN clause
-            tskDatabaseQueries.Add(Task.Run(async () =>
+            List<LargeTable> results;
+            using (var context = _dbContextFactory.CreateDbContext())
             {
-                await Parallel.ForEachAsync(chunkInt, parallelOptions, async (sublist, cancellationToken) =>
-                {
-                    var queryResult = await RetrieveIntegerChunkAsync(sublist);
-                    resultBag.Add(queryResult);
-                });
-            }));
+                //results = await context.LargeTables
+                //                .Where(lt => context.LargeTables
+                //                    .Where(lt2 => lt2.ProjectRef == "MyRef")
+                //                    .Select(lt2 => lt2.ID)
+                //                    .Contains(lt.ID))
+                //                .ToListAsync();
 
-            // make a linq call using Char as the IN clause
-            tskDatabaseQueries.Add(Task.Run(async () =>
-            {
-                await Parallel.ForEachAsync(chunkChar, parallelOptions, async (sublist, cancellationToken) =>
-                {
-                    var queryResult = await RetrieveCharChunkAsync(sublist);
-                    resultBag.Add(queryResult);
-                });
-            }));
+                var result = await context.LargeTables
+                   .FromSqlRaw(@"
+        SELECT *
+        FROM [LinqPerformanceDemo].[dbo].[LargeTable]
+        WHERE ID IN (SELECT TOP 10 ID FROM [LinqPerformanceDemo].[dbo].[LargeTable])
+    ")
+                   .ToListAsync();
 
-            // make a linq call using Double as the IN clause
-            tskDatabaseQueries.Add(Task.Run(async () =>
-            {
-                await Parallel.ForEachAsync(chunkDouble, parallelOptions, async (sublist, cancellationToken) =>
-                {
-                    var queryResult = await RetrieveDoubleChunkAsync(sublist);
-                    resultBag.Add(queryResult);
-                });
-            }));
 
-            // make a linq call using String as the IN clause
-            tskDatabaseQueries.Add(Task.Run(async () =>
-            {
-                await Parallel.ForEachAsync(chunkString, parallelOptions, async (sublist, cancellationToken) =>
-                {
-                    var queryResult = await RetrieveStringChunkAsync(sublist);
-                    resultBag.Add(queryResult);
-                });
-            }));
+            }
+            Console.WriteLine($"Start Time: {DateTime.Now}");
 
-            // Wait for all tasks to complete
-            await Task.WhenAll(tskDatabaseQueries);
+            //const int CHUNK_SIZE = 100_000;            
+            //var tskDatabaseQueries = new List<Task>(); // maintain the running background tasks
+            //var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
+            //var resultBag = new ConcurrentBag<List<LargeTable>>(); // ConcurrentBag to hold all results safely
+
+            //// mock a client that uses a cache of data to filter against - retrieve cached data (1M in each collection) - data will be duplicated in cases like char!
+            //List<int> cacheInt = await Retrieve1MCacheIntegerAsync();
+            //List<char> cacheChar = await Retrieve1MCacheCharAsync();
+            //List<double?> cacheDouble = await Retrieve1MCacheDoubleAsync();
+            //List<string> cacheString = await Retrieve1MCacheStringAsync();
+
+            //// chunk data into 100K batches for looping
+            //var chunkInt = cacheInt.Chunk(CHUNK_SIZE);
+            //var chunkChar = cacheChar.Chunk(CHUNK_SIZE);
+            //var chunkDouble = cacheDouble.Chunk(CHUNK_SIZE);
+            //var chunkString = cacheString.Chunk(CHUNK_SIZE);
+
+            //// make a linq call using Integer as the IN clause
+            //tskDatabaseQueries.Add(Task.Run(async () =>
+            //{
+            //    await Parallel.ForEachAsync(chunkInt, parallelOptions, async (sublist, cancellationToken) =>
+            //    {
+            //        var queryResult = await RetrieveIntegerChunkAsync(sublist);
+            //        resultBag.Add(queryResult);
+            //    });
+            //}));
+
+            //// make a linq call using Char as the IN clause
+            //tskDatabaseQueries.Add(Task.Run(async () =>
+            //{
+            //    await Parallel.ForEachAsync(chunkChar, parallelOptions, async (sublist, cancellationToken) =>
+            //    {
+            //        var queryResult = await RetrieveCharChunkAsync(sublist);
+            //        resultBag.Add(queryResult);
+            //    });
+            //}));
+
+            //// make a linq call using Double as the IN clause
+            //tskDatabaseQueries.Add(Task.Run(async () =>
+            //{
+            //    await Parallel.ForEachAsync(chunkDouble, parallelOptions, async (sublist, cancellationToken) =>
+            //    {
+            //        var queryResult = await RetrieveDoubleChunkAsync(sublist);
+            //        resultBag.Add(queryResult);
+            //    });
+            //}));
+
+            //// make a linq call using String as the IN clause
+            //tskDatabaseQueries.Add(Task.Run(async () =>
+            //{
+            //    await Parallel.ForEachAsync(chunkString, parallelOptions, async (sublist, cancellationToken) =>
+            //    {
+            //        var queryResult = await RetrieveStringChunkAsync(sublist);
+            //        resultBag.Add(queryResult);
+            //    });
+            //}));
+
+            //// Wait for all tasks to complete
+            //await Task.WhenAll(tskDatabaseQueries);
 
             Console.WriteLine($"End Time: {DateTime.Now}");
 
-            // display a snapshot of data to confirm queries worked
-            DisplayQueryResults(resultBag?.FirstOrDefault()?.ToList());
+            //// display a snapshot of data to confirm queries worked
+            //DisplayQueryResults(resultBag?.FirstOrDefault()?.ToList());
 
             stopwatch.Stop();
 

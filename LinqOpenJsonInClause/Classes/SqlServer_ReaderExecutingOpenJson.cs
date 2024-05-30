@@ -75,7 +75,7 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
             List<string> typeList = new List<string>();
 
             // Split the values string by commas and trim each value
-            string[] valueArray = values.Split(',');
+            string[] valueArray = values.Split(','); //  A sun-query inside an IN clause will return a count of 1, like this query: SELECT * FROM[LinqPerformanceDemo].[dbo].[LargeTable] WHERE ID IN (SELECT TOP 10 ID FROM[LinqPerformanceDemo].[dbo].[LargeTable])
             if (valueArray.Length < MINIMUM_ITEM_SIZE) return values;
 
             foreach (string value in valueArray)
