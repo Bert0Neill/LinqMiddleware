@@ -46,24 +46,18 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
         #endregion
 
         #region Helper Methods
+
         private string ConvertInClausesToOpenJson(string sqlStatement)
         {
-            // Define regular expressions to match IN or NOT IN clauses
-            Regex inRegex = new Regex(@"\bIN\s*\((.*?)\)", RegexOptions.IgnoreCase);
-            Regex notInRegex = new Regex(@"\bNOT\s+IN\s*\((.*?)\)", RegexOptions.IgnoreCase);
+            // Define a single regular expression to match both IN and NOT IN clauses
+            Regex inClauseRegex = new Regex(@"\b(NOT\s+)?IN\s*\((.*?)\)", RegexOptions.IgnoreCase);
 
-            // Find all NOT IN clauses and replace them with OPENJSON format
-            string result = notInRegex.Replace(sqlStatement, match =>
+            // Replace IN and NOT IN clauses with the OPENJSON format
+            string result = inClauseRegex.Replace(sqlStatement, match =>
             {
-                string values = match.Groups[1].Value.Trim();
-                return "NOT IN (" + ConvertToOpenJson(values) + ")";
-            });
-
-            // Find all IN clauses and replace them with OPENJSON format
-            result = inRegex.Replace(result, match =>
-            {
-                string values = match.Groups[1].Value.Trim();
-                return "IN (" + ConvertToOpenJson(values) + ")";
+                string prefix = match.Groups[1].Value; // Capture 'NOT ' if it exists
+                string values = match.Groups[2].Value.Trim(); // Capture the values inside the parentheses
+                return $"{prefix}IN ({ConvertToOpenJson(values)})";
             });
 
             return result;
@@ -71,44 +65,44 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
 
         private string ConvertToOpenJson(string values)
         {
-            List<string> valueList = new List<string>();
-            List<string> typeList = new List<string>();
+            const string OPENJSON_SYNTAX = "SELECT value FROM OPENJSON('[ {0} ]') WITH ( {1} )";
+            const string OPEN_JSON_NVARCHAR_MAX = "Value NVARCHAR(MAX) '$'";
+            const string OPEN_JSON_INT_MAX = "Value INT '$'";
+            const string CHAR_PREFIX = "N'";
 
-            // Split the values string by commas and trim each value
+            List<string> valueList = new();
+            string typeList = string.Empty;
+
+            // split the values string by commas and trim each value            
             string[] valueArray = values.Split(','); //  A sun-query inside an IN clause will return a count of 1, like this query: SELECT * FROM[LinqPerformanceDemo].[dbo].[LargeTable] WHERE ID IN (SELECT TOP 10 ID FROM[LinqPerformanceDemo].[dbo].[LargeTable])
+            valueArray = valueArray.Select(itm => itm.Trim()).ToArray(); // remove any leading\trailing spaces
+            valueArray = valueArray.Select(s => s.StartsWith(CHAR_PREFIX) ? s.Substring(1) : s).ToArray(); // if value starts with N' remove the N. To cater for Char converions of string
+
             if (valueArray.Length < MINIMUM_ITEM_SIZE) return values;
 
-            foreach (string value in valueArray)
+            // Check if the value is integer, double or default to NVarchar
+            string trimmedValue = valueArray[0];
+            if (int.TryParse(trimmedValue, out int intValue))
             {
-                // Trim whitespace
-                string trimmedValue = value.Trim(); // remove any leading\trailing spaces
-
-                // Check if the value is integer, double or default to NVarchar
-                if (int.TryParse(trimmedValue, out int intValue))
-                {
-                    // For integer values, add them as is
-                    valueList.Add(trimmedValue);
-                    typeList.Add("Value INT '$'");
-                }
-                else if (double.TryParse(trimmedValue, out double doubleValue))
-                {
-                    // For non-integer numeric values, add them as is (assuming they will be cast to NVARCHAR(MAX))
-                    valueList.Add(trimmedValue);
-                    typeList.Add("Value NVARCHAR(MAX) '$'");
-                }
-                else
-                {
-                    trimmedValue = trimmedValue.Trim('\''); // remove single quotes from start\end of string                    
-                    valueList.Add("\"" + trimmedValue.Replace("\"", "\\\"") + "\""); // for strings, wrap in double quotes and escape any existing quotes
-                    typeList.Add("Value NVARCHAR(MAX) '$'");
-                }
+                // For integer values, add them as is
+                valueList = valueArray.ToList();
+                typeList = OPEN_JSON_INT_MAX;
+            }
+            else if (double.TryParse(trimmedValue, out double doubleValue))
+            {
+                // For non-integer numeric values, add them as is (will be cast to NVARCHAR(MAX))
+                valueList = valueArray.ToList();
+                typeList = OPEN_JSON_NVARCHAR_MAX;
+            }
+            else // string based
+            {
+                // remove single quotes from start\end of string and wrap in double quotes and escape any existing quotes
+                valueList = valueArray.Select(s => "\"" + s.Trim('\'').Replace("\"", "\\\"") + "\"").ToList();
+                typeList = OPEN_JSON_NVARCHAR_MAX;
             }
 
-            // Ensure that all types in the typeList are the same; otherwise, this approach will not work directly in SQL Server
-            string typeDeclaration = typeList.Contains("Value NVARCHAR(MAX) '$'") ? "Value NVARCHAR(MAX) '$'" : "Value INT '$'";
-
-            return "SELECT value FROM OPENJSON('[" + string.Join(",", valueList) + "]') WITH (" + typeDeclaration + ")";
-        }        
+            return String.Format(OPENJSON_SYNTAX, string.Join(",", valueList), typeList);
+        }
         #endregion
     }
 }
