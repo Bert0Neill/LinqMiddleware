@@ -9,7 +9,7 @@ namespace LinqOpenJsonInClauseMiddleware.Classes
     public class SqlServerReaderExecutingOpenJson : DbCommandInterceptor, ILinqOpenJsonMiddleware
     {
         #region Class variables
-        const int MINIMUM_ITEM_SIZE = 1000; // as queries can be complex and have multiple IN\NOT IN clause, EF will cascade the IN clauses to other tables, thus it's best to implement the OpenJson at around 1K of values to cover this scenario
+        const int MINIMUM_ITEM_SIZE = 2; // as queries can be complex and have multiple IN\NOT IN clause, EF will cascade the IN clauses to other tables, thus it's best to implement the OpenJson at around 1K of values to cover this scenario
         #endregion
 
         #region Override methods
