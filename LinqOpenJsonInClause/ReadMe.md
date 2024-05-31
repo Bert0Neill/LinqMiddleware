@@ -83,10 +83,11 @@ The concept when using a large amount (in the millions) of values for your LINQ 
 
 For example below:
 
- 1.  I plan to create a list of values with a chunk size of 100K.
- 2. Create a list of tasks to hold the tasks when they are run in parallel.
- 3. Design my [Parallel Options](https://medium.com/@luisalexandre.rodrigues/c-parallel-programming-working-with-parallel-loops-part-iv-22044371b340) (in this case I am only using 2 cores, you can load this value form a config file, so that you can easily configure this value per environment, per deployment).
- 4. Then a ConcurrentBag to hold my results (in this case I will be returning a model class called LargeTable).
+ 1. Generate a list of values with a chunk size of 100,000.
+ 2. Create a collection to manage the tasks executed in parallel.
+ 3. Configure [Parallel Options](https://medium.com/@luisalexandre.rodrigues/c-parallel-programming-working-with-parallel-loops-part-iv-22044371b340), setting the number of cores to 2. You can load this value from a configuration file to easily adjust it per environment and deployment.
+ 4. Utilize a ConcurrentBag to store the results, which will be instances of a model class called LargeTable.
+
 ``` csharp
 const int CHUNK_SIZE = 100_000;            
 var tskDatabaseQueries = new List<Task>(); // maintain the running background tasks
@@ -94,7 +95,7 @@ var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
 var resultBag = new ConcurrentBag<List<LargeTable>>(); // ConcurrentBag to hold all results safely
 ```
 
-I call a method that will return 1 million integers, which is then chucked into a list of integers, 100K in dimension.
+I call a method that will return 1 million integers, which is then chucked into a list of integers, 100K in size.
 ``` csharp
 List<int> cacheInt = await Retrieve1MCacheIntegerAsync();
 var chunkInt = cacheInt.Chunk(CHUNK_SIZE);
@@ -107,7 +108,7 @@ private async Task<List<int>> Retrieve1MCacheIntegerAsync(int recoundCount = 1_0
     }
 }
 ```
-I will then make numerous calls to the database with a Parallel loop (but restraining the calls to 2 at a time, in my case - parallel options). When the call returns I add the results into a (thread safe) ConcurrentBag (when is expecting the appropriate datatype - LargeTable class model). Finally I wait for all the threaded tasks to be completed before continuing.
+I then make numerous calls to the database using a Parallel loop (but restraining the calls to 2 at a time). When the call returns, I add the results into a (thread safe) ConcurrentBag (that is expecting the appropriate datatype - LargeTable class model). Finally, I wait for all the threaded tasks to be completed before continuing.
 ``` csharp
 tskDatabaseQueries.Add(Task.Run(async () =>
 {
@@ -171,5 +172,4 @@ await Task.WhenAll(tskDatabaseQueries);
 
  1. Currently only SQL Server 2016+ will be able to execute SQL statements with **OpenJson**.
  2. [Entity Framework Core 8 Nuget](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore) package already has this functionality implemented. 
- 3. For MySQL users, use the **Pomelo.EntityFrameworkCore.MySql** package, this already caters for large amounts of values within your IN clause.
  
